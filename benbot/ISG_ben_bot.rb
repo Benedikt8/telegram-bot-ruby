@@ -94,6 +94,12 @@ chatlinux = ""     # INSERISCI QUI L'ID DELLA CHAT
         inc = incdevs
         tag = tagruby # stesso per devs e ruby
     end
+  
+    if chatid == chatlinux
+        head = headlinux
+        inc = inclinux
+        tag = taglinux
+    end
 
     msg = saluto + head + corpo + inc + piede + tag + base
 end
@@ -131,7 +137,7 @@ end
 ### Informazioni
 ## Chat
 def title (message)                         # Titolo CHAT
-    title =  "@" + pulisci(message.chat.title)
+    title = pulisci(message.chat.title)
 end
 
 def chatid (message)                        # Id CHAT
@@ -150,6 +156,12 @@ end
 def user (message)
     user = message.from.username
     user = "NESSUNO\nCREANE UNO AL PIU' PRESTO!" if user.nil?
+end
+
+def me (bot)
+    infome = bot.api.getMe
+    me = infome['result']['id'].to_s
+    me
 end
 
 ### LOGGING SU TERMINALE
@@ -288,7 +300,8 @@ Telegram::Bot::Client.run(token, logger: logger) do |bot|
             message.text == '/kik'
             kik = true
             error = false
-            me = "L'ID UTENTE DEL BOT"              # INSERISCI QUI L'ID UTENTE DEL BOT
+            me = me(bot)
+
             chatid = message.chat.id
             reply = message.reply_to_message
 
@@ -298,10 +311,15 @@ Telegram::Bot::Client.run(token, logger: logger) do |bot|
             risposta = ""
 
             # Target User su cui è stato chiamato il kik
-            t_userkik = message.reply_to_message.from.username
-            t_nomekik = message.reply_to_message.from.first_name
-            t_idkik = message.reply_to_message.from.id.to_s
-            t_userkik == nil ? t_reply = "Id: "+t_idkik : t_reply = "User: @"+t_userkik
+            if reply.nil?
+                t_userkik = t_nomekik = t_idkik = nil
+            else
+                t_userkik = message.reply_to_message.from.username
+                t_nomekik = message.reply_to_message.from.first_name
+                t_idkik = message.reply_to_message.from.id.to_s
+
+                t_userkik == nil ? t_reply = "Id: "+t_idkik : t_reply = "User: @"+t_userkik
+            end
 
             # Caller User che ha chiamato il kik
             c_userkik = message.from.username
@@ -309,14 +327,14 @@ Telegram::Bot::Client.run(token, logger: logger) do |bot|
             c_idkik = message.from.id.to_s
             c_userkik == nil ? c_reply = "Id: "+c_idkik : c_reply = "User: @"+c_userkik
 
-
             if  kik and
                 !is_admin?(c_idkik, bot, message)
                 error = 1 # Non è amministratore
-
-                if is_admin?(t_idkik, bot, message)
+                if  !t_idkik.nil? and
+                    is_admin?(t_idkik, bot, message)
                     error += 1 ## 2 E voleva kikkare un admin...
                 end
+
                 kik = false
             end
 
