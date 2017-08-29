@@ -113,6 +113,7 @@ def i (messaggio)                           # testo ITALIC
 end
 
 def pulisci (messaggio)                     # utilizza gli HTML special CHARS
+    messaggio = messaggio.gsub "&", "&amp;"
     messaggio = messaggio.gsub "<", "&lt;"
     messaggio = messaggio.gsub ">", "&gt;"
     messaggio
